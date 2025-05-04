@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>留言反馈</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#3B82F6',
+                        secondary: '#10B981',
+                        accent: '#6366F1',
+                        neutral: '#6B7280',
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .card-shadow {
+                box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+            .input-focus {
+                @apply focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none;
+            }
+            .btn-hover {
+                @apply hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200;
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.3s ease-out forwards;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 font-inter text-gray-800 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-5xl">
+        <header class="mb-8 text-center">
+            <h1 class="text-[clamp(1.8rem,5vw,2.5rem)] font-bold text-primary mb-2">留言反馈</h1>
+
+        </header>
+
+        <!-- 留言框 -->
+        <div class="bg-white rounded-xl p-4 shadow-md">
+            <h2 class="text-lg font-semibold text-gray-800 mb-3 flex items-center">
+                <i class="fa-solid fa-comment-dots mr-2 text-primary"></i>留言反馈
+            </h2>
+            <div id="status" class="mb-3 text-sm"></div>
+            
+            <form id="留言Form">
+                <div class="mb-4">
+                    <textarea id="内容" rows="4" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary/50 focus:border-primary focus:outline-none transition-all" placeholder="请输入留言内容..." required></textarea>
+                </div>
+                
+                <button type="submit" class="w-full bg-primary hover:bg-primary/90 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 hover:shadow-lg flex items-center justify-center">
+                    <i class="fa-solid fa-paper-plane mr-2"></i>发送留言
+                </button>
+            </form>
+        </div> 
+
+        <footer class="mt-8 text-center text-xs text-gray-500">
+            <p>© 2025 留言反馈联系</p>
+        </footer>
+    </div> 
+
+    <script>
+        // 留言框 
+        const apiUrl = 'https://push.showdoc.com.cn/server/api/push/568547487739bdd3ab5f134161b64ed81917862573';
+
+        document.getElementById('留言Form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const 内容 = document.getElementById('内容').value;
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                // 显示发送中状态
+                statusDiv.textContent = '发送中...';
+                statusDiv.classList.remove('hidden', 'text-red-500', 'text-green-500');
+                statusDiv.classList.add('text-blue-500', 'animate-fade-in');
+
+                // 发送请求
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: new URLSearchParams({
+                        content: 内容,
+                        title: '新留言反馈'
+                    })
+                });
+
+                const result = await response.json();
+                
+                if (result.error_code === 0) {
+                    statusDiv.textContent = '留言成功！';
+                    statusDiv.classList.remove('text-blue-500');
+                    statusDiv.classList.add('text-green-500');
+                    
+                    // 清空表单
+                    document.getElementById('内容').value = '';
+                } else {
+                    throw new Error(result.error_message || '发送失败');
+                }
+            } catch (error) {
+                statusDiv.textContent = '发送失败，请重试';
+                statusDiv.classList.remove('text-blue-500');
+                statusDiv.classList.add('text-red-500');
+                console.error('Error:', error);
+            }
+            
+            // 3秒后清除提示
+            setTimeout(() => {
+                statusDiv.textContent = '';
+            }, 3000);
+        });
+   </script>
+
+
+
+</body>
+</html>
